@@ -1,3 +1,5 @@
+This project is a fork of [Ladicle/tcardgen](https://github.com/Ladicle/tcardgen) that I customized for hugo wowchemy.
+
 # Twitter Card Image Generator
 
 Generate Twitter card (OGP) images for your blog posts.
@@ -11,13 +13,13 @@ Also, both toml and yaml formats are supported.
 ### Go version < 1.16
 
 ```bash
-go get github.com/Ladicle/tcardgen@latest
+go get github.com/shunk031/tcardgen@latest
 ```
 
 ### Go 1.16+
 
 ```bash
-go install github.com/Ladicle/tcardgen@latest
+go install github.com/shunk031/tcardgen@latest
 ```
 
 ## Getting Started
