@@ -2,12 +2,10 @@ package hugo
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/gohugoio/hugo/parser/pageparser"
 	"github.com/mattn/go-runewidth"
@@ -139,7 +137,6 @@ func getString(cfm *pageparser.ContentFrontMatter, fmKey string) (string, error)
 			return "", NewFMNotExistError(fmKey)
 		}
 		s = makeFixedWidthString(s, 89)
-		fmt.Println(len(s), utf8.RuneCountInString(s))
 
 		return s, nil
 	default:
