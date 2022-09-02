@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/Ladicle/tcardgen/pkg/canvas/box"
-	"github.com/Ladicle/tcardgen/pkg/canvas/fontfamily"
+	"github.com/shunk031/tcardgen/pkg/canvas/box"
+	"github.com/shunk031/tcardgen/pkg/canvas/fontfamily"
 )
 
 type DrawingConfig struct {

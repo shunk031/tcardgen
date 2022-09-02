@@ -11,10 +11,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/Ladicle/tcardgen/pkg/canvas"
-	"github.com/Ladicle/tcardgen/pkg/canvas/fontfamily"
-	"github.com/Ladicle/tcardgen/pkg/config"
-	"github.com/Ladicle/tcardgen/pkg/hugo"
+	"github.com/shunk031/tcardgen/pkg/canvas"
+	"github.com/shunk031/tcardgen/pkg/canvas/fontfamily"
+	"github.com/shunk031/tcardgen/pkg/config"
+	"github.com/shunk031/tcardgen/pkg/hugo"
 )
 
 const (
@@ -196,7 +196,7 @@ func generateTCard(contentPath, outPath string, tpl image.Image, ffa *fontfamily
 		return err
 	}
 	if err := c.DrawTextAtPoint(
-		fmt.Sprintf("%s%s%s", fm.Author, cnf.Info.Separator, fm.Date.Format("Jan 2")),
+		fmt.Sprintf("%s%s%s", fm.Authors, cnf.Info.Separator, fm.Date.Format("Jan 2")),
 		*cnf.Info.Start,
 		canvas.FgHexColor(cnf.Info.FgHexColor),
 		canvas.FontFaceFromFFA(ffa, cnf.Info.FontStyle, cnf.Info.FontSize),

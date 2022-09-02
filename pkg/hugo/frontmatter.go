@@ -1,17 +1,21 @@
 package hugo
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gohugoio/hugo/parser/pageparser"
+	"github.com/mattn/go-runewidth"
 )
 
 const (
 	fmTitle      = "title"
-	fmAuthor     = "author"
+	fmAuthors    = "authors"
 	fmCategories = "categories"
 	fmTags       = "tags"
 
@@ -22,7 +26,7 @@ const (
 
 type FrontMatter struct {
 	Title    string
-	Author   string
+	Authors  string
 	Category string
 	Tags     []string
 	Date     time.Time
@@ -49,19 +53,19 @@ func parseFrontMatter(r io.Reader) (*FrontMatter, error) {
 	if fm.Title, err = getString(&cfm, fmTitle); err != nil {
 		return nil, err
 	}
-	if isArray := isArray(&cfm, fmAuthor); isArray {
-		if fm.Author, err = getFirstStringItem(&cfm, fmAuthor); err != nil {
+	if isArray := isArray(&cfm, fmAuthors); isArray {
+		if fm.Authors, err = getConcatenatedStringItem(&cfm, fmAuthors); err != nil {
 			return nil, err
 		}
 	} else {
-		if fm.Author, err = getString(&cfm, fmAuthor); err != nil {
+		if fm.Authors, err = getString(&cfm, fmAuthors); err != nil {
 			return nil, err
 		}
 	}
 	if fm.Category, err = getFirstStringItem(&cfm, fmCategories); err != nil {
 		return nil, err
 	}
-	if fm.Tags, err = getAllStringItems(&cfm, fmTags); err != nil {
+	if fm.Tags, err = getTags(&cfm, fmTags); err != nil {
 		return nil, err
 	}
 	if fm.Date, err = getContentDate(&cfm); err != nil {
@@ -101,6 +105,28 @@ func getTime(cfm *pageparser.ContentFrontMatter, fmKey string) (time.Time, error
 	}
 }
 
+func makeFixedWidthString(str string, length int) string {
+	var buffer bytes.Buffer
+	l := 0
+	for _, c := range str {
+		cl := runewidth.RuneWidth(c)
+		if l+cl > length {
+			for _, c = range "..." {
+				buffer.WriteRune(c)
+			}
+			break
+		}
+		buffer.WriteRune(c)
+		l += cl
+	}
+
+	// for i := 0; i < length-l; i++ {
+	// 	buffer.WriteRune(' ')
+	// }
+
+	return buffer.String()
+}
+
 func getString(cfm *pageparser.ContentFrontMatter, fmKey string) (string, error) {
 	v, ok := cfm.FrontMatter[fmKey]
 	if !ok {
@@ -112,6 +138,9 @@ func getString(cfm *pageparser.ContentFrontMatter, fmKey string) (string, error)
 		if s == "" {
 			return "", NewFMNotExistError(fmKey)
 		}
+		s = makeFixedWidthString(s, 89)
+		fmt.Println(len(s), utf8.RuneCountInString(s))
+
 		return s, nil
 	default:
 		return "", NewFMInvalidTypeError(fmKey, "string", s)
@@ -144,6 +173,35 @@ func getAllStringItems(cfm *pageparser.ContentFrontMatter, fmKey string) ([]stri
 
 	default:
 		return nil, NewFMInvalidTypeError(fmKey, "[]interface{}", arr)
+	}
+}
+
+func getConcatenatedStringItem(cfm *pageparser.ContentFrontMatter, fmKey string) (string, error) {
+	arr, err := getAllStringItems(cfm, fmKey)
+	if err != nil {
+		return "", err
+	}
+	if len(arr) > 2 {
+		if len(arr) > 4 {
+			arr = arr[:3]
+		}
+		return strings.Join(arr, ", "), nil
+	} else {
+		return arr[0], nil
+	}
+}
+
+func getTags(cfm *pageparser.ContentFrontMatter, fmKey string) ([]string, error) {
+	arr, err := getAllStringItems(cfm, fmKey)
+	if err != nil {
+		return nil, err
+	}
+	if len(arr) > 3 {
+		arr = arr[:3]
+		arr = append(arr, "...")
+		return arr, nil
+	} else {
+		return arr, nil
 	}
 }
 

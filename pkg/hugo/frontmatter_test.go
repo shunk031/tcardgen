@@ -19,7 +19,7 @@ func TestParseFrontMatterFromReader(t *testing.T) {
 			desc: "Parse YAML front matter",
 			input: `---
 title: "HugoでもTwitterCardを自動生成したい"
-author: ["@Ladicle"]
+author: ["@shunk031"]
 date: 2020-06-21T03:56:24+09:00
 tags: ["hugo", "go", "OGP"]
 categories: ["program"]
@@ -27,7 +27,7 @@ categories: ["program"]
 content`,
 			expectFM: &FrontMatter{
 				Title:    "HugoでもTwitterCardを自動生成したい",
-				Author:   "@Ladicle",
+				Authors:  "@shunk031",
 				Category: "program",
 				Tags:     []string{"hugo", "go", "OGP"},
 				Date:     mustParseRFC3339(t, "2020-06-21T03:56:24+09:00"),
@@ -37,7 +37,7 @@ content`,
 			desc: "Parse TOML front matter",
 			input: `+++
 title = "HugoでもTwitterCardを自動生成したい"
-author = ["@Ladicle"]
+author = ["@shunk031"]
 date = "2020-06-21T03:56:24+09:00"
 tags = ["hugo", "go", "OGP"]
 categories = ["program"]
@@ -45,7 +45,7 @@ categories = ["program"]
 content`,
 			expectFM: &FrontMatter{
 				Title:    "HugoでもTwitterCardを自動生成したい",
-				Author:   "@Ladicle",
+				Authors:  "@shunk031",
 				Category: "program",
 				Tags:     []string{"hugo", "go", "OGP"},
 				Date:     mustParseRFC3339(t, "2020-06-21T03:56:24+09:00"),
@@ -65,7 +65,7 @@ title = "invalid format'
 		{
 			desc: "Title is missing",
 			input: `+++
-author = ["@Ladicle"]
+author = ["@shunk031"]
 +++`,
 			expectErr: NewFMNotExistError(fmTitle),
 		},
@@ -81,13 +81,13 @@ title = ""
 			input: `+++
 title = "Title"
 +++`,
-			expectErr: NewFMNotExistError(fmAuthor),
+			expectErr: NewFMNotExistError(fmAuthors),
 		},
 		{
 			desc: "Category is empty",
 			input: `+++
 title = "Title"
-author = ["@Ladicle"]
+author = ["@shunk031"]
 categories = [""]
 +++`,
 			expectErr: NewFMNotExistError(fmCategories),
@@ -96,7 +96,7 @@ categories = [""]
 			desc: "Tag is missing",
 			input: `+++
 title = "Title"
-author = ["@Ladicle"]
+author = ["@shunk031"]
 categories = ["Program"]
 +++`,
 			expectErr: NewFMNotExistError(fmTags),
@@ -105,7 +105,7 @@ categories = ["Program"]
 			desc: "Time is missing",
 			input: `+++
 title = "Title"
-author = ["@Ladicle"]
+author = ["@shunk031"]
 categories = ["cat11"]
 tags = ["tag1"]
 +++`,

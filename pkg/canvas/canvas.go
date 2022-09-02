@@ -9,9 +9,9 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 
-	"github.com/Ladicle/tcardgen/pkg/canvas/box"
-	"github.com/Ladicle/tcardgen/pkg/canvas/fontfamily"
-	"github.com/Ladicle/tcardgen/pkg/config"
+	"github.com/shunk031/tcardgen/pkg/canvas/box"
+	"github.com/shunk031/tcardgen/pkg/canvas/fontfamily"
+	"github.com/shunk031/tcardgen/pkg/config"
 )
 
 func CreateCanvasFromImage(tpl image.Image) (*Canvas, error) {
