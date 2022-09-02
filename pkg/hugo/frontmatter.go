@@ -2,6 +2,7 @@ package hugo
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -52,7 +53,7 @@ func parseFrontMatter(r io.Reader) (*FrontMatter, error) {
 		return nil, err
 	}
 	if isArray := isArray(&cfm, fmAuthors); isArray {
-		if fm.Authors, err = getConcatenatedStringItem(&cfm, fmAuthors); err != nil {
+		if fm.Authors, err = getAuthorsString(&cfm, fmAuthors); err != nil {
 			return nil, err
 		}
 	} else {
@@ -60,7 +61,7 @@ func parseFrontMatter(r io.Reader) (*FrontMatter, error) {
 			return nil, err
 		}
 	}
-	if fm.Category, err = getFirstStringItem(&cfm, fmCategories); err != nil {
+	if fm.Category, err = getConcatenatedStringItem(&cfm, fmCategories, 2); err != nil {
 		return nil, err
 	}
 	if fm.Tags, err = getTags(&cfm, fmTags); err != nil {
@@ -173,18 +174,34 @@ func getAllStringItems(cfm *pageparser.ContentFrontMatter, fmKey string) ([]stri
 	}
 }
 
-func getConcatenatedStringItem(cfm *pageparser.ContentFrontMatter, fmKey string) (string, error) {
+func getAuthorsString(cfm *pageparser.ContentFrontMatter, fmKey string) (string, error) {
+	arr, err := getAllStringItems(cfm, fmKey)
+	if err != nil {
+		return "", err
+	}
+	if len(arr) > 1 {
+		if len(arr) > 2 {
+			return fmt.Sprintf("%s et al.", arr[0]), nil
+		} else {
+			return strings.Join(arr, ", "), nil
+		}
+	} else {
+		return arr[0], nil
+	}
+}
+
+func getConcatenatedStringItem(cfm *pageparser.ContentFrontMatter, fmKey string, numItems int) (string, error) {
 	arr, err := getAllStringItems(cfm, fmKey)
 	if err != nil {
 		return "", err
 	}
 	if len(arr) > 2 {
-		if len(arr) > 4 {
-			arr = arr[:3]
+		if len(arr) > numItems {
+			arr = arr[:numItems]
 		}
-		return strings.Join(arr, ", "), nil
+		return fmt.Sprintf("%s ...", strings.Join(arr, ", ")), nil
 	} else {
-		return arr[0], nil
+		return strings.Join(arr, ", "), nil
 	}
 }
 
