@@ -1,5 +1,21 @@
 This project is a fork of [Ladicle/tcardgen](https://github.com/Ladicle/tcardgen) that I customized for hugo wowchemy.
 
+To merge the latest changes from the original repository, run the following commands in this repository:
+
+```shell
+git remote add upstream https://github.com/Ladicle/tcardgen
+git fetch upstream
+```
+
+```shell
+git checkout -b update-from-upstream 
+git merge upstream/master 
+
+#
+# You may need to resolve conflicts here. You need to accept incoming changes for all files.
+#
+```
+
 # Twitter Card Image Generator
 
 Generate Twitter card (OGP) images for your blog posts.
@@ -96,7 +112,6 @@ You can generate only the image of the updated article by using `git diff` and `
 $ git diff --name-only HEAD content/post |\
     xargs tcardgen -o static/tcard -f assets/fonts/kinto-sans -t assets/template.png
 ```
-
 
 ## Usage
 
