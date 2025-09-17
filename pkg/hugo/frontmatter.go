@@ -2,6 +2,7 @@ package hugo
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
