@@ -8,7 +8,8 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/gohugoio/hugo v0.140.1
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/pkg/errors v0.9.1
+	github.com/mattn/go-runewidth v0.0.9
+	github.com/soundkitchen/budoux/golang v0.0.0-20250606090534-f2a0ebbb9aa6
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/image v0.23.0
 )

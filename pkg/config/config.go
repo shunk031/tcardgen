@@ -25,9 +25,10 @@ type TextOption struct {
 
 type MultiLineTextOption struct {
 	TextOption
-	MaxWidth    int   `json:"maxWidth,omitempty"`
-	LineSpacing *int  `json:"lineSpacing,omitempty"`
-	Enabled     *bool `json:"enabled,omitempty"`
+	MaxWidth          int    `json:"maxWidth,omitempty"`
+	LineSpacing       *int   `json:"lineSpacing,omitempty"`
+	Enabled           *bool  `json:"enabled,omitempty"`
+	SegmentationLevel string `json:"segmentationLevel,omitempty"`
 }
 
 type BoxTextsOption struct {

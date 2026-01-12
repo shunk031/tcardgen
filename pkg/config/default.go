@@ -15,8 +15,9 @@ var defaultCnf = DrawingConfig{
 			FontSize:   72,
 			FontStyle:  fontfamily.Bold,
 		},
-		MaxWidth:    946,
-		LineSpacing: ptrInt(10),
+		MaxWidth:          946,
+		LineSpacing:       ptrInt(10),
+		SegmentationLevel: "default",
 	},
 	Category: &TextOption{
 		Enabled:    ptrBool(true),

@@ -16,6 +16,7 @@ import (
 	"github.com/shunk031/tcardgen/pkg/canvas/fontfamily"
 	"github.com/shunk031/tcardgen/pkg/config"
 	"github.com/shunk031/tcardgen/pkg/hugo"
+	"github.com/shunk031/tcardgen/pkg/text"
 )
 
 const (
@@ -187,11 +188,13 @@ func generateTCard(streams IOStreams, contentPath, outPath string, tpl image.Ima
 	}
 
 	/* Title */
+	segLevel := text.ParseSegmentationLevel(cnf.Title.SegmentationLevel)
 	if err := c.DrawTextAtPoint(
 		fm.Title,
 		*cnf.Title.Start,
 		canvas.MaxWidth(cnf.Title.MaxWidth),
 		canvas.LineSpacing(*cnf.Title.LineSpacing),
+		canvas.SegmentationLevel(segLevel),
 		canvas.FgHexColor(cnf.Title.FgHexColor),
 		canvas.FontFaceFromFFA(ffa, cnf.Title.FontStyle, cnf.Title.FontSize),
 	); err != nil {

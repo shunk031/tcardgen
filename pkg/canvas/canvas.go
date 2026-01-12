@@ -1,10 +1,10 @@
 package canvas
 
 import (
-	"bytes"
 	"image"
 	"image/draw"
 	"strings"
+	"unicode"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
@@ -12,6 +12,7 @@ import (
 	"github.com/shunk031/tcardgen/pkg/canvas/box"
 	"github.com/shunk031/tcardgen/pkg/canvas/fontfamily"
 	"github.com/shunk031/tcardgen/pkg/config"
+	"github.com/shunk031/tcardgen/pkg/text"
 )
 
 func CreateCanvasFromImage(tpl image.Image) (*Canvas, error) {
@@ -29,12 +30,13 @@ type Canvas struct {
 	dst *image.RGBA
 	fdr *font.Drawer
 
-	bgColor    *image.Uniform
-	maxWidth   int
-	lineSpace  int
-	boxPadding config.Padding
-	boxSpace   int
-	boxAlign   box.Align
+	bgColor           *image.Uniform
+	maxWidth          int
+	lineSpace         int
+	boxPadding        config.Padding
+	boxSpace          int
+	boxAlign          box.Align
+	segmentationLevel text.SegmentationLevel
 }
 
 // SaveAsPNG saves this canvas as a PNG file into the specified path.
@@ -63,55 +65,64 @@ func (c *Canvas) DrawTextAtPoint(text string, start config.Point, opts ...textDr
 	return nil
 }
 
-func (c *Canvas) drawMultiLineText(text string) {
+
+func (c *Canvas) drawMultiLineText(textStr string) {
+	// Always use BudoX segmentation for better Japanese line breaking
+	c.drawMultiLineTextWithBudoX(textStr)
+}
+
+
+func (c *Canvas) drawMultiLineTextWithBudoX(textStr string) {
 	var (
-		x      = c.fdr.Dot.X
-		rtext  = []rune(text)
-		length = len(rtext)
-
-		lbuf bytes.Buffer
-		wbuf bytes.Buffer
+		x         = c.fdr.Dot.X
+		segments  = text.SegmentForLineBreaksWithLevel(textStr, c.segmentationLevel)
+		lineBuf   strings.Builder
 	)
-	for i := 0; i < length; i++ {
-		r := rtext[i]
 
-		wbuf.WriteRune(r)
-
-		switch {
-		case spaceChar(r):
-			// noop
-		case oneByteChar(r) || startBracket(r):
-			if (i + 1) < length {
-				continue
-			}
-		case (i+1) < length && endChar(rtext[i+1]):
-			wbuf.WriteRune(rtext[i+1])
-			i++
+	for i, segment := range segments {
+		if segment == "" {
+			continue
 		}
-
-		lbuf.Write(wbuf.Bytes())
-
-		adv := c.fdr.MeasureBytes(lbuf.Bytes())
+		
+		// Test if adding this segment would exceed max width
+		currentLine := lineBuf.String()
+		testLine := currentLine + segment
+		
+		adv := c.fdr.MeasureString(testLine)
+		
+		// If this segment fits on the current line, add it
 		if adv <= fixed.I(c.maxWidth) {
-			wbuf.Reset()
-			if (i + 1) < length {
-				continue
+			lineBuf.WriteString(segment)
+		} else {
+			// Draw the current line if it has content
+			if lineBuf.Len() > 0 {
+				// Trim trailing spaces from the line before drawing
+				lineContent := strings.TrimRightFunc(lineBuf.String(), unicode.IsSpace)
+				if lineContent != "" {
+					c.fdr.DrawString(lineContent)
+					c.fdr.Dot.X = x
+					c.fdr.Dot.Y += c.fdr.Face.Metrics().Height + fixed.I(c.lineSpace)
+				}
+				lineBuf.Reset()
+			}
+			
+			// Start new line with this segment, but trim leading spaces
+			newLineSegment := strings.TrimLeftFunc(segment, unicode.IsSpace)
+			lineBuf.WriteString(newLineSegment)
+		}
+		
+		// If this is the last segment, draw the remaining content
+		if i == len(segments)-1 && lineBuf.Len() > 0 {
+			// Trim trailing spaces from the final line before drawing
+			lineContent := strings.TrimRightFunc(lineBuf.String(), unicode.IsSpace)
+			if lineContent != "" {
+				c.fdr.DrawString(lineContent)
 			}
 		}
-
-		c.fdr.DrawBytes(lbuf.Bytes()[:lbuf.Len()-wbuf.Len()])
-		c.fdr.Dot.X = x
-		c.fdr.Dot.Y += c.fdr.Face.Metrics().Height + fixed.I(c.lineSpace)
-
-		lbuf.Reset()
-		lbuf.Write(wbuf.Bytes())
-		wbuf.Reset()
-	}
-
-	if len(lbuf.Bytes()) != 0 {
-		c.fdr.DrawBytes(lbuf.Bytes()[:lbuf.Len()-wbuf.Len()])
 	}
 }
+
+
 
 func (c *Canvas) DrawBoxTexts(texts []string, start config.Point, opts ...textDrawOption) error {
 	for _, f := range opts {
@@ -245,6 +256,14 @@ func BoxSpacing(px int) textDrawOption {
 func BoxAlign(align box.Align) textDrawOption {
 	return func(c *Canvas) error {
 		c.boxAlign = align
+		return nil
+	}
+}
+
+// SegmentationLevel sets the text segmentation level for BudoX.
+func SegmentationLevel(level text.SegmentationLevel) textDrawOption {
+	return func(c *Canvas) error {
+		c.segmentationLevel = level
 		return nil
 	}
 }
