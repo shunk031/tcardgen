@@ -30,12 +30,13 @@ type Canvas struct {
 	dst *image.RGBA
 	fdr *font.Drawer
 
-	bgColor    *image.Uniform
-	maxWidth   int
-	lineSpace  int
-	boxPadding config.Padding
-	boxSpace   int
-	boxAlign   box.Align
+	bgColor           *image.Uniform
+	maxWidth          int
+	lineSpace         int
+	boxPadding        config.Padding
+	boxSpace          int
+	boxAlign          box.Align
+	segmentationLevel text.SegmentationLevel
 }
 
 // SaveAsPNG saves this canvas as a PNG file into the specified path.
@@ -74,7 +75,7 @@ func (c *Canvas) drawMultiLineText(textStr string) {
 func (c *Canvas) drawMultiLineTextWithBudoX(textStr string) {
 	var (
 		x         = c.fdr.Dot.X
-		segments  = text.SegmentForLineBreaks(textStr)
+		segments  = text.SegmentForLineBreaksWithLevel(textStr, c.segmentationLevel)
 		lineBuf   strings.Builder
 	)
 
@@ -255,6 +256,14 @@ func BoxSpacing(px int) textDrawOption {
 func BoxAlign(align box.Align) textDrawOption {
 	return func(c *Canvas) error {
 		c.boxAlign = align
+		return nil
+	}
+}
+
+// SegmentationLevel sets the text segmentation level for BudoX.
+func SegmentationLevel(level text.SegmentationLevel) textDrawOption {
+	return func(c *Canvas) error {
+		c.segmentationLevel = level
 		return nil
 	}
 }
